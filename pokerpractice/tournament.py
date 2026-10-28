@@ -7,7 +7,6 @@ import random
 import statistics
 import time
 from dataclasses import asdict, dataclass
-from typing import Any
 
 from pokerpractice.bots.base import (
     Bot,
@@ -95,11 +94,12 @@ def _hand_hash(records: list[dict]) -> str:
 
 def _make_observation(
     adapter: PokerKitHoldemAdapter,
-    result: dict,
+    action_history: list[PublicAction],
     seat: int,
     button: int,
     anon_ids: tuple[str, ...],
     live_seats: tuple[int, ...],
+    positions: dict[int, str],
     hole_cards: dict[int, tuple[str, str]],
     hand_number: int,
     rules: RulesConfig,
@@ -108,7 +108,6 @@ def _make_observation(
     level: int,
 ) -> Observation:
     public = adapter.public_view()
-    positions = _positions(live_seats, button)
     current_actor = public["actor_seat"]
     if current_actor is None:
         raise RuntimeError("cannot build an observation without an actor")
@@ -144,15 +143,7 @@ def _make_observation(
         players_remaining=len(live_seats),
         to_call=public["to_call"],
         legal=adapter.legal_actions(),
-        action_history=tuple(
-            PublicAction(
-                seat_anon=anon_ids[event.seat],
-                street=event.street,
-                kind=event.kind,
-                amount=event.amount,
-            )
-            for event in result["actions"]
-        ),
+        action_history=tuple(action_history),
         hand_number=hand_number,
         hands_remaining=max(0, rules.hand_cap - hand_number),
         payouts=rules.payouts,
@@ -263,6 +254,132 @@ def _stats(decisions: list[dict], hands: list[dict]) -> dict[str, dict]:
                 for failure in ("exception", "invalid_action", "timeout_soft", "timeout_hard")
             },
         }
+        first_preflop = {}
+        for row in preflop:
+            first_preflop.setdefault((row["seat"], row["hand_number"]), row)
+
+        def group_key(field, row):
+            if field == "lineup":
+                return tuple(row["lineup"])
+            return row[field]
+
+        for field, output_key in (
+            ("position", "by_position"),
+            ("stack_bucket", "by_stack_bucket"),
+            ("lineup", "by_lineup"),
+        ):
+            grouped = {}
+            for row in rows:
+                grouped.setdefault(group_key(field, row), []).append(row)
+            group_stats = {}
+            for key, selected in grouped.items():
+                opportunities = {
+                    hand_key
+                    for hand_key, initial in first_preflop.items()
+                    if group_key(field, initial) == key
+                }
+                opportunity_rows = [
+                    row for row in preflop
+                    if (row["seat"], row["hand_number"]) in opportunities
+                ]
+                vpip = {
+                    hand_key
+                    for hand_key in opportunities
+                    if any(
+                        (row["seat"], row["hand_number"]) == hand_key
+                        and row["applied_action"]["kind"] in ("CALL", "RAISE")
+                        for row in opportunity_rows
+                    )
+                }
+                pfr = {
+                    hand_key
+                    for hand_key in opportunities
+                    if any(
+                        (row["seat"], row["hand_number"]) == hand_key
+                        and row["applied_action"]["kind"] == "RAISE"
+                        for row in opportunity_rows
+                    )
+                }
+                selected_postflop = [row for row in selected if row["street"] != "preflop"]
+                bets_raises = sum(
+                    row["applied_action"]["kind"] == "RAISE"
+                    for row in selected_postflop
+                )
+                selected_calls = sum(
+                    row["applied_action"]["kind"] == "CALL"
+                    for row in selected_postflop
+                )
+                selected_checks = sum(
+                    row["applied_action"]["kind"] == "CHECK"
+                    for row in selected_postflop
+                )
+                selected_folds = sum(
+                    row["applied_action"]["kind"] == "FOLD"
+                    for row in selected_postflop
+                )
+                saw_flop = showdowns = won_showdown = 0
+                seats_in_group = {row["seat"] for row in selected}
+                for hand in hands:
+                    folded_preflop = {
+                        event["seat"] for event in hand["actions"]
+                        if event["street"] == "preflop" and event["kind"] == "FOLD"
+                    }
+                    folded_any = {
+                        event["seat"] for event in hand["actions"]
+                        if event["kind"] == "FOLD"
+                    }
+                    for seat in seats_in_group:
+                        initial = first_preflop.get((seat, hand["hand_number"]))
+                        if (
+                            initial is None
+                            or group_key(field, initial) != key
+                            or hand["starting_stacks"][seat] <= 0
+                            or seat in folded_preflop
+                            or len(hand["board"]) < 3
+                        ):
+                            continue
+                        saw_flop += 1
+                        if hand["showdown_ranks"] and seat not in folded_any:
+                            showdowns += 1
+                            if any(seat in pot["winners"] for pot in hand["pots"]):
+                                won_showdown += 1
+                group_latencies = sorted(row["latency_ns"] for row in selected)
+
+                def group_percentile(q):
+                    if not group_latencies:
+                        return 0.0
+                    index = max(0, math.ceil(q * len(group_latencies)) - 1)
+                    return group_latencies[index] / 1000
+
+                key_text = "|".join(key) if isinstance(key, tuple) else str(key)
+                group_stats[key_text] = {
+                    "vpip_count": len(vpip),
+                    "vpip_opportunities": len(opportunities),
+                    "pfr_count": len(pfr),
+                    "pfr_opportunities": len(opportunities),
+                    "af_numerator": bets_raises,
+                    "af_denominator": selected_calls,
+                    "afq_numerator": bets_raises,
+                    "afq_denominator": (
+                        bets_raises + selected_calls + selected_checks + selected_folds
+                    ),
+                    "wtsd_count": showdowns,
+                    "wtsd_opportunities": saw_flop,
+                    "wusd_count": won_showdown,
+                    "wusd_opportunities": showdowns,
+                    "latency_us": {
+                        "median": statistics.median(group_latencies) / 1000
+                        if group_latencies else 0.0,
+                        "p95": group_percentile(0.95),
+                        "p99": group_percentile(0.99),
+                        "max": group_latencies[-1] / 1000 if group_latencies else 0.0,
+                        "count": len(group_latencies),
+                    },
+                    "failure_count": sum(
+                        row["failure_type"] is not None for row in selected
+                    ),
+                }
+            output[label][output_key] = group_stats
     return output
 
 
@@ -271,10 +388,15 @@ def run_sng(
     rules: RulesConfig,
     timing: TimingConfig,
     roster: tuple[OpponentSpec, ...],
+    hero_path: str | Path | None = None,
+    log_level: str = "full",
 ) -> SNGResult:
     started = time.perf_counter_ns()
     if rules.players != len(roster) + 1:
         raise ValueError("player count must equal hero plus roster entries")
+    if log_level not in {"full", "hero", "summary"}:
+        raise ValueError(f"unsupported log level: {log_level}")
+    lineup = tuple(spec.style for spec in roster)
     seat_rng = stream(seed, "seating")
     seats = list(range(rules.players))
     seat_rng.shuffle(seats)
@@ -288,7 +410,15 @@ def run_sng(
     bot_labels = [""] * rules.players
     for seat in range(rules.players):
         if seat == hero_seat:
-            bots[seat] = make_bot("hero", stream(seed, "bot", seat), hero=True)
+            if hero_path is None:
+                bots[seat] = make_bot("hero", stream(seed, "bot", seat), hero=True)
+            else:
+                bots[seat] = make_bot(
+                    "hero",
+                    stream(seed, "bot", seat),
+                    hero=True,
+                    hero_path=hero_path,
+                )
             bot_labels[seat] = "hero"
         else:
             spec = spec_order.pop()
@@ -317,6 +447,7 @@ def run_sng(
     live = set(range(rules.players))
     hand_records: list[dict] = []
     decision_records: list[dict] = []
+    stats_hand_records: list[dict] = []
     hand_number = 0
     adapter = PokerKitHoldemAdapter()
     while len(live) > 1 and hand_number < rules.hand_cap:
@@ -345,16 +476,17 @@ def run_sng(
             board_cards,
             burn_cards,
         )
-        hand_decisions: list[dict] = []
-        result_state: dict[str, Any] = {"actions": []}
+        positions = _positions(live_seats, button)
+        public_history: list[PublicAction] = []
         while (actor_seat := adapter.actor_seat()) is not None:
             obs = _make_observation(
                 adapter,
-                result_state,
+                public_history,
                 actor_seat,
                 button,
                 anon_ids,
                 live_seats,
+                positions,
                 hole_cards,
                 hand_number,
                 rules,
@@ -377,32 +509,45 @@ def run_sng(
                     "invalid_action",
                     "engine rejected requested action",
                 )
-            event_data = _event_dict(event)
-            result_state["actions"].append(event)
+            public_history.append(
+                PublicAction(
+                    seat_anon=anon_ids[event.seat],
+                    street=event.street,
+                    kind=event.kind,
+                    amount=event.amount,
+                )
+            )
+            detailed_log = log_level == "full" or (
+                log_level == "hero" and actor_seat == hero_seat
+            )
             decision = {
                 "seed": seed,
                 "hand_number": hand_number,
                 "seat": actor_seat,
                 "bot_label": bot_labels[actor_seat],
                 "street": obs.street,
-                "position": next(row.position for row in obs.seats if row.seat == actor_seat),
+                "position": positions.get(actor_seat, "OUT"),
                 "stack_bucket": _stack_bucket(obs.seats[actor_seat].stack, big_blind),
-                "lineup": tuple(spec.style for spec in roster),
-                "observation": asdict(obs),
-                "legal_actions": asdict(obs.legal),
-                "requested_action": _action_dict(outcome.requested),
+                "lineup": lineup,
                 "applied_action": _action_dict(applied),
                 "latency_ns": outcome.latency_ns,
                 "failure_type": outcome.failure_type,
-                "exception_text": outcome.exception_text,
-                "diagnostics": (
-                    outcome.requested.diag
-                    if outcome.requested and outcome.requested.diag is not None
-                    else bots[actor_seat].last_diagnostics
-                ),
             }
-            decision["event"] = event_data
-            hand_decisions.append(decision)
+            if detailed_log:
+                observation = asdict(obs)
+                event_data = _event_dict(event)
+                decision.update(
+                    observation=observation,
+                    legal_actions=observation["legal"],
+                    requested_action=_action_dict(outcome.requested),
+                    exception_text=outcome.exception_text,
+                    diagnostics=(
+                        outcome.requested.diag
+                        if outcome.requested and outcome.requested.diag is not None
+                        else bots[actor_seat].last_diagnostics
+                    ),
+                    event=event_data,
+                )
             decision_records.append(decision)
         hand_result = adapter.hand_result()
         if sum(hand_result.ending_stacks) != total_chips:
@@ -431,34 +576,44 @@ def run_sng(
                 winner = next(iter(live))
                 points[winner] = rules.payouts[0]
                 score_updates[winner] = points[winner]
-        private_hand = {
-            "seed": seed,
+        stats_hand_records.append({
             "hand_number": hand_number,
-            "button": button,
-            "blinds": [small_blind, big_blind],
-            "starting_stacks": starting,
-            "ending_stacks": hand_result.ending_stacks,
-            "hole_cards": hole_cards,
-            "board": hand_result.board,
             "actions": [_event_dict(event) for event in hand_result.actions],
-            "pots": [
-                {
-                    "amount": pot.amount,
-                    "eligible_seats": pot.eligible_seats,
-                    "winners": pot.winners,
-                }
-                for pot in hand_result.pots
-            ],
-            "refunds": hand_result.refunds,
-            "showdown": hand_result.showdown_cards,
+            "starting_stacks": starting,
+            "board": hand_result.board,
             "showdown_ranks": hand_result.showdown_ranks,
-            "chip_deltas": hand_result.chip_deltas,
-            "eliminations": busted,
-            "scoring_updates": score_updates,
-            "showdown_seats": tuple(seat for seat, _ in hand_result.showdown_cards),
-        }
-        private_hand["hand_content_sha256"] = _hand_hash([private_hand])
-        hand_records.append(private_hand)
+            "pots": [{"winners": pot.winners} for pot in hand_result.pots],
+        })
+        if log_level != "summary":
+            private_hand = {
+                "seed": seed,
+                "hand_number": hand_number,
+                "hero_seat": hero_seat,
+                "button": button,
+                "blinds": [small_blind, big_blind],
+                "starting_stacks": starting,
+                "ending_stacks": hand_result.ending_stacks,
+                "hole_cards": hole_cards,
+                "board": hand_result.board,
+                "actions": [_event_dict(event) for event in hand_result.actions],
+                "pots": [
+                    {
+                        "amount": pot.amount,
+                        "eligible_seats": pot.eligible_seats,
+                        "winners": pot.winners,
+                    }
+                    for pot in hand_result.pots
+                ],
+                "refunds": hand_result.refunds,
+                "showdown": hand_result.showdown_cards,
+                "showdown_ranks": hand_result.showdown_ranks,
+                "chip_deltas": hand_result.chip_deltas,
+                "eliminations": busted,
+                "scoring_updates": score_updates,
+                "showdown_seats": tuple(seat for seat, _ in hand_result.showdown_cards),
+            }
+            private_hand["hand_content_sha256"] = _hand_hash([private_hand])
+            hand_records.append(private_hand)
         public_result = PublicHandResult(
             hand_number=hand_number,
             chip_changes=tuple(enumerate(hand_result.chip_deltas)),
@@ -487,7 +642,7 @@ def run_sng(
         hero_finish = 1 + sum(
             stacks[seat] > stacks[hero_seat] for seat in live if seat != hero_seat
         )
-    stats = _stats(decision_records, hand_records)
+    stats = _stats(decision_records, stats_hand_records)
     return SNGResult(
         seed=seed,
         hero_seat=hero_seat,

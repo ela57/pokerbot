@@ -84,21 +84,19 @@ class PokerKitHoldemAdapter:
         self.pot_results = None
         self.showdown_ranks = ()
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", UserWarning)
-            self.state = NoLimitTexasHoldem.create_state(
-                _AUTOMATIONS,
-                True,
-                0,
-                (small_blind, big_blind),
-                big_blind,
-                [stacks[seat] for seat in self.seat_by_index],
-                len(self.seat_by_index),
-            )
-            for index, seat in enumerate(self.seat_by_index):
-                for card in self.cards_by_seat[seat]:
-                    self.state.deal_hole(card, index)
-            self.advance()
+        self.state = NoLimitTexasHoldem.create_state(
+            _AUTOMATIONS,
+            True,
+            0,
+            (small_blind, big_blind),
+            big_blind,
+            [stacks[seat] for seat in self.seat_by_index],
+            len(self.seat_by_index),
+        )
+        for index, seat in enumerate(self.seat_by_index):
+            for card in self.cards_by_seat[seat]:
+                self._deal_explicit(self.state.deal_hole, card, index)
+        self.advance()
 
     def actor_seat(self) -> int | None:
         if self.state is None or self.state.street is None or self.state.actor_index is None:
@@ -223,7 +221,9 @@ class PokerKitHoldemAdapter:
             elif state.can_burn_card():
                 if self.burn_cursor >= len(self.burn_schedule):
                     raise RuntimeError("burn schedule exhausted")
-                state.burn_card(self.burn_schedule[self.burn_cursor])
+                self._deal_explicit(
+                    state.burn_card, self.burn_schedule[self.burn_cursor]
+                )
                 self.burn_cursor += 1
             elif state.can_deal_board():
                 if self.board_cursor == 0:
@@ -233,7 +233,10 @@ class PokerKitHoldemAdapter:
                 end = self.board_cursor + count
                 if end > len(self.board_schedule):
                     raise RuntimeError("board schedule exhausted")
-                state.deal_board("".join(self.board_schedule[self.board_cursor:end]))
+                self._deal_explicit(
+                    state.deal_board,
+                    "".join(self.board_schedule[self.board_cursor:end]),
+                )
                 self.board_cursor = end
             elif state.can_kill_hand():
                 self._capture_pots_and_ranks(state)
@@ -375,6 +378,15 @@ class PokerKitHoldemAdapter:
 
     def _final_stack_for_seat(self, state, seat: int) -> int:
         return int(state.stacks[self.index_by_seat[seat]])
+
+    @staticmethod
+    def _deal_explicit(deal, *cards) -> None:
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=r"^A card being dealt .* is not recommended to be dealt",
+            )
+            deal(*cards)
 
     def _street_name(self, state) -> str:
         if state.street is None:

@@ -18,6 +18,10 @@ Odd-chip resolution is checked against PokerKit's actual behavior in the adapter
 
 Each SNG derives SHA-256-based independent `random.Random` streams for seating, each bot, and each hand's shuffled deck. Absolute seats receive `deck[2*s:2*s+2]`, and the board is `deck[16:21]`. Frozen observations contain primitive tuples and dataclasses only; no PokerKit state, deck, other players' cards, strategy names, or seeds cross into bot code.
 
-## Current scope
+## Opponents and analysis
 
-Phase 1 includes a practice tournament, generic opponent registry, simple placeholder opponents, run/batch commands, timings, and structured logs. The seven researched opponents and richer analysis/replay commands are phase 2.
+The registry supports the seven configured opponents as well as the phase-1 placeholder bots. Each strategy receives only its seeded RNG, explicit YAML parameters, and a strength preset. Preflop ranks are generated locally by `tools/build_preflop_table.py`; no third-party dataset is used. Equity evaluation is bounded and runs only inside the opponent's decision.
+
+Batch workers are persistent spawned processes. Each consumes multiple SNG tasks from a shared queue; the parent tracks an individual wall deadline and replaces a worker killed for a hung SNG. Per-task compressed shards are atomically renamed before merging, so a killed writer cannot leave a partial gzip record.
+
+The CLI includes run, batch, profile, bench, replay, hands, decisions, report, compare, and aggregate6 workflows. See the other docs for assumptions and attribution.

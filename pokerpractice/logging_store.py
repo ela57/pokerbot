@@ -44,19 +44,26 @@ def write_manifest(
     seeds: list[int],
     label: str | None,
     source_root: Path,
+    hero_path: str | Path | None = None,
 ) -> dict:
     snapshot = run_dir / "snapshot"
     snapshot.mkdir()
-    snapshot_paths = [
-        source_root / "pokerpractice" / "bots" / "my_bot.py",
-        *sorted((source_root / "configs").glob("*.yaml")),
-    ]
+    hero_source = Path(hero_path) if hero_path is not None else Path("bots/my_bot.py")
+    if not hero_source.is_absolute():
+        hero_source = source_root / hero_source
+    hero_source = hero_source.resolve()
+    hero_snapshot = snapshot / "hero" / hero_source.name
+    hero_snapshot.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(hero_source, hero_snapshot)
     hashes = {}
+    snapshot_paths = sorted((source_root / "configs").glob("*.yaml"))
     for source in snapshot_paths:
         destination = snapshot / source.relative_to(source_root)
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
         hashes[str(destination.relative_to(run_dir))] = _sha256(destination)
+    hero_snapshot_path = str(hero_snapshot.relative_to(run_dir))
+    hashes[hero_snapshot_path] = _sha256(hero_snapshot)
     try:
         commit = subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=source_root, text=True, stderr=subprocess.DEVNULL
@@ -77,8 +84,9 @@ def write_manifest(
         "dependencies": versions,
         "opponent_params": roster,
         "hero_bot": {
-            "snapshot": "snapshot/pokerpractice/bots/my_bot.py",
-            "sha256": hashes["snapshot/pokerpractice/bots/my_bot.py"],
+            "path": str(hero_path if hero_path is not None else "bots/my_bot.py"),
+            "snapshot": hero_snapshot_path,
+            "sha256": hashes[hero_snapshot_path],
         },
         "snapshot_hashes": hashes,
         "git_commit": commit,
@@ -156,8 +164,21 @@ def _decision_index(row: dict) -> dict:
     }
 
 
-def write_worker_shard(run_dir: Path, worker_id: int, result: SNGResult, log_level: str) -> None:
-    path = run_dir / "shards" / f"worker-{worker_id}.jsonl.gz"
+def write_worker_shard(
+    run_dir: Path,
+    worker_id: int,
+    result: SNGResult,
+    log_level: str,
+    task_index: int | None = None,
+    generation: int = 0,
+) -> None:
+    shard_name = (
+        f"worker-{worker_id}.jsonl.gz"
+        if task_index is None
+        else f"worker-{worker_id}-g{generation}-task{task_index}.jsonl.gz"
+    )
+    path = run_dir / "shards" / shard_name
+    temporary_path = path.with_suffix(path.suffix + ".tmp")
     compact_stats = {
         label: {key: value for key, value in values.items() if key != "latencies_ns"}
         for label, values in result.stats.items()
@@ -184,8 +205,9 @@ def write_worker_shard(run_dir: Path, worker_id: int, result: SNGResult, log_lev
         "decision_index": [_decision_index(row) for row in result.decision_records],
     }
     payload["summary"]["stats"] = compact_stats
-    with gzip.open(path, "at", encoding="utf-8") as stream:
+    with gzip.open(temporary_path, "wt", encoding="utf-8") as stream:
         stream.write(json.dumps(payload, separators=(",", ":"), default=_json_default) + "\n")
+    os.replace(temporary_path, path)
 
 
 def _json_default(value: Any):

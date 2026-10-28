@@ -1,8 +1,84 @@
 opponents:
-  - style: check_call
-  - style: random
-  - style: check_call
-  - style: random
-  - style: check_call
-  - style: random
-  - style: check_call
+  - style: nit
+    strength: normal
+    params:
+      open_pct: 8
+      call_pct: 12
+      reraise_pct: 3
+      aggression_frequency: 0.22
+      bluff_frequency: 0.01
+      call_strength: 0.72
+      value_threshold: 0.82
+      bet_pot_fraction: 0.55
+  - style: tag
+    strength: normal
+    params:
+      open_pct: 22
+      call_pct: 30
+      reraise_pct: 9
+      aggression_frequency: 0.48
+      bluff_frequency: 0.07
+      call_strength: 0.53
+      value_threshold: 0.73
+      bet_pot_fraction: 0.65
+  - style: lag
+    strength: normal
+    params:
+      open_pct: 39
+      call_pct: 49
+      reraise_pct: 17
+      aggression_frequency: 0.73
+      bluff_frequency: 0.21
+      call_strength: 0.42
+      value_threshold: 0.66
+      bet_pot_fraction: 0.82
+  - style: calling_station
+    strength: normal
+    params:
+      enter_pct: 57
+      call_pct: 67
+      raise_strength: 0.88
+      raise_frequency: 0.18
+      call_strength: 0.16
+      bluff_frequency: 0.01
+      bet_pot_fraction: 0.45
+  - style: maniac
+    strength: normal
+    params:
+      open_pct: 76
+      call_pct: 88
+      reraise_pct: 40
+      aggression_frequency: 0.94
+      bluff_frequency: 0.48
+      call_strength: 0.31
+      value_threshold: 0.58
+      bet_pot_fraction: 1.35
+  - style: equity
+    strength: normal
+    params:
+      open_pct: 30
+      call_pct: 40
+      reraise_pct: 11
+      assumed_call_range_pct: 48
+      assumed_raise_range_pct: 16
+      monte_carlo_samples: 30
+      call_equity_margin: 0.025
+      value_bet_threshold: 0.72
+      aggression_frequency: 0.42
+      bluff_frequency: 0.03
+      bet_pot_fraction: 0.68
+  - style: short_stack
+    strength: normal
+    params:
+      push_bb: 15
+      push_pct: 25
+      call_push_pct: 14
+      deep_open_pct: 22
+      deep_call_pct: 30
+      deep_reraise_pct: 8
+      bubble_risk: 0.18
+      aggression_frequency: 0.45
+      bluff_frequency: 0.05
+      call_strength: 0.53
+      value_threshold: 0.74
+      bet_pot_fraction: 0.65

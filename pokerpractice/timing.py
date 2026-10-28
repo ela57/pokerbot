@@ -47,6 +47,7 @@ def _is_valid(action: object, obs: Observation) -> bool:
 
 
 def call_bot(bot: Bot, obs: Observation, config: TimingConfig) -> DecisionOutcome:
+    bot.last_diagnostics = None
     started = 0
     elapsed = 0
     requested = None
@@ -77,7 +78,7 @@ def call_bot(bot: Bot, obs: Observation, config: TimingConfig) -> DecisionOutcom
         elapsed = time.perf_counter_ns() - started if started else 0
         failure_type = "timeout_hard"
         exception_text = str(exc)
-    except BaseException as exc:
+    except Exception as exc:
         elapsed = time.perf_counter_ns() - started if started else 0
         failure_type = "exception"
         exception_text = f"{type(exc).__name__}: {exc}"

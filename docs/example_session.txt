@@ -1,0 +1,1317 @@
+### v1: 200 SNGs
+Run directory: /home/ubuntu/repos/poker-practice/runs/20261028T223042Z_e170ca
+SNGs: 200 completed, 0 failed
+Throughput: 7.43 SNGs/s; 1249.31 hands/s
+Hero mean points: 13.370 ± 1.419 SE (n=200)
+Hero mean hands played: 168.0
+Stats definitions: VPIP = voluntary preflop call/raise per hand with a preflop decision (walks excluded); PFR = preflop raise per same opportunity; AF = postflop bets+raises/calls; AFq = postflop bets+raises over all postflop decisions; WTSD = showdowns/saw-flop hands for players not folded preflop; W$SD = hands winning any chips at showdown/showdowns. Positions are BTN, SB, BB, UTG.., CO by live-seat count (heads-up: BTN/SB, BB); stack BB buckets are <10, 10-20, 20-40, 40-100, 100+. Counts are decision opportunities.
+calling_station: VPIP 0.898 (4898 opp), PFR 0.009 (4898 opp), AF 0.037 (2011 calls), AFq 0.005 (15264 decisions), WTSD 0.997 (4909 saw flop), W$SD 0.386 (4893 showdowns); latency µs med/p95/p99/max=14.2/22.4/27.6/6361.7; failures exception=0, invalid_action=0, timeout_soft=23, timeout_hard=0
+  Position decisions: BTN=4484, BTN/SB=826, SB=4779, BB=3897, UTG=2064, MP1=899, MP2=233, MP3=125, CO=3704; stack BB decisions: <10=1260, 10-20=1145, 20-40=2698, 40-100=5998, 100+=9910
+equity: VPIP 0.371 (22520 opp), PFR 0.117 (22520 opp), AF 1.613 (1464 calls), AFq 0.078 (30404 decisions), WTSD 0.852 (10575 saw flop), W$SD 0.491 (9010 showdowns); latency µs med/p95/p99/max=151.2/250.1/362.7/15824.5; failures exception=0, invalid_action=0, timeout_soft=364, timeout_hard=0
+  Position decisions: BTN=11581, BTN/SB=6239, SB=10097, BB=16180, UTG=2387, MP1=714, MP2=114, MP3=78, CO=6530; stack BB decisions: <10=2356, 10-20=4318, 20-40=11758, 40-100=22975, 100+=12513
+hero: VPIP 0.895 (5990 opp), PFR 0.000 (5990 opp), AF 0.000 (2318 calls), AFq 0.000 (18643 decisions), WTSD 1.000 (5994 saw flop), W$SD 0.392 (5994 showdowns); latency µs med/p95/p99/max=1.4/2.0/2.6/892.6; failures exception=0, invalid_action=0, timeout_soft=0, timeout_hard=0
+  Position decisions: BTN=5662, BTN/SB=1466, SB=6038, BB=4599, UTG=2422, MP1=893, MP2=253, MP3=158, CO=4088; stack BB decisions: <10=1747, 10-20=1998, 20-40=3561, 40-100=6227, 100+=12046
+lag: VPIP 0.475 (9837 opp), PFR 0.260 (9837 opp), AF 3.569 (745 calls), AFq 0.193 (13804 decisions), WTSD 0.862 (4969 saw flop), W$SD 0.442 (4285 showdowns); latency µs med/p95/p99/max=12.7/23.7/29.3/4124.4; failures exception=0, invalid_action=0, timeout_soft=18, timeout_hard=0
+  Position decisions: BTN=5184, BTN/SB=1859, SB=4548, BB=6371, UTG=1725, MP1=780, MP2=115, MP3=70, CO=3511; stack BB decisions: <10=773, 10-20=1250, 20-40=2931, 40-100=9772, 100+=9437
+maniac: VPIP 0.857 (1688 opp), PFR 0.705 (1688 opp), AF 11.858 (127 calls), AFq 0.682 (2207 decisions), WTSD 0.652 (1098 saw flop), W$SD 0.292 (716 showdowns); latency µs med/p95/p99/max=13.5/25.1/32.2/3037.5; failures exception=0, invalid_action=0, timeout_soft=4, timeout_hard=0
+  Position decisions: BTN=834, BTN/SB=286, SB=786, BB=861, UTG=320, MP1=239, MP2=96, MP3=92, CO=581; stack BB decisions: <10=26, 10-20=27, 20-40=68, 40-100=822, 100+=3152
+nit: VPIP 0.091 (23224 opp), PFR 0.014 (23224 opp), AF 0.295 (1101 calls), AFq 0.021 (15711 decisions), WTSD 0.914 (5390 saw flop), W$SD 0.487 (4925 showdowns); latency µs med/p95/p99/max=8.3/22.8/27.6/3794.1; failures exception=0, invalid_action=0, timeout_soft=24, timeout_hard=0
+  Position decisions: BTN=7606, BTN/SB=2157, SB=7232, BB=15985, UTG=1610, MP1=458, MP2=75, MP3=38, CO=4151; stack BB decisions: <10=7323, 10-20=6589, 20-40=7428, 40-100=14292, 100+=3680
+short_stack: VPIP 0.291 (16841 opp), PFR 0.092 (16841 opp), AF 0.823 (1385 calls), AFq 0.061 (18769 decisions), WTSD 0.888 (6502 saw flop), W$SD 0.472 (5771 showdowns); latency µs med/p95/p99/max=13.0/23.7/28.8/4579.0; failures exception=0, invalid_action=0, timeout_soft=25, timeout_hard=0
+  Position decisions: BTN=7423, BTN/SB=2906, SB=7132, BB=11231, UTG=2002, MP1=670, MP2=90, MP3=58, CO=4768; stack BB decisions: <10=1276, 10-20=4161, 20-40=8045, 40-100=15158, 100+=7640
+tag: VPIP 0.263 (18956 opp), PFR 0.092 (18956 opp), AF 1.625 (1166 calls), AFq 0.090 (21015 decisions), WTSD 0.905 (7229 saw flop), W$SD 0.482 (6541 showdowns); latency µs med/p95/p99/max=11.3/23.2/28.0/6057.6; failures exception=0, invalid_action=0, timeout_soft=18, timeout_hard=0
+  Position decisions: BTN=7978, BTN/SB=3847, SB=7291, BB=13860, UTG=1999, MP1=613, MP2=93, MP3=58, CO=4900; stack BB decisions: <10=3163, 10-20=4769, 20-40=8888, 40-100=15338, 100+=8481
+### Biggest loss in v1
+Hero biggest losses:
+seed=1000182 hand=120 delta=-7260 position=BB start_bb=54.7
+### Successful hero-view replay after fixing JSON seat-key lookup
+seed=1000182 hand=120 button=1 blinds=[75, 150]
+Mode: HERO VIEW
+Your hole cards: ['3s', '4c']
+Public action sequence:
+  seat 1 preflop: raise 395
+  seat 2 preflop: call 245
+  seat 2 flop: check 0
+  seat 1 flop: raise 647
+  seat 2 flop: call 647
+  seat 2 turn: check 0
+  seat 1 turn: raise 1708
+  seat 2 turn: call 1708
+  seat 2 river: check 0
+  seat 1 river: raise 4510
+  seat 2 river: call 4510
+
+--- Hero decision 1: preflop ---
+Exact observation given to the hero:
+{
+  "hole_cards": [
+    "3s",
+    "4c"
+  ],
+  "board": [],
+  "street": "preflop",
+  "my_seat": 2,
+  "button_seat": 1,
+  "actor_seat": 2,
+  "seats": [
+    {
+      "seat": 0,
+      "anon_id": "opp-e3305812",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 1,
+      "anon_id": "opp-ab67d329",
+      "stack": 7401,
+      "bet_this_street": 395,
+      "total_contributed": 395,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BTN/SB"
+    },
+    {
+      "seat": 2,
+      "anon_id": "opp-cae754c0",
+      "stack": 8054,
+      "bet_this_street": 150,
+      "total_contributed": 150,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BB"
+    },
+    {
+      "seat": 3,
+      "anon_id": "opp-ecf89d82",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 4,
+      "anon_id": "opp-bd217b6d",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 5,
+      "anon_id": "opp-2741f531",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 6,
+      "anon_id": "opp-401aaba5",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 7,
+      "anon_id": "opp-21dffcca",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    }
+  ],
+  "pot_total": 545,
+  "pot_breakdown": [],
+  "small_blind": 75,
+  "big_blind": 150,
+  "level": 4,
+  "players_remaining": 2,
+  "to_call": 245,
+  "legal": {
+    "can_fold": true,
+    "can_check": false,
+    "can_call": true,
+    "call_amount": 245,
+    "min_raise_to": 640,
+    "max_raise_to": 8204
+  },
+  "action_history": [
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "preflop",
+      "kind": "raise",
+      "amount": 395
+    }
+  ],
+  "hand_number": 120,
+  "hands_remaining": 80,
+  "payouts": [
+    100.0,
+    60.0,
+    40.0,
+    25.0,
+    15.0,
+    10.0,
+    5.0,
+    0.0
+  ]
+}
+Applied action: {'kind': 'CALL', 'amount': None, 'diag': None}
+Outcome, not a demonstrable mistake under the review rules.
+
+--- Hero decision 2: flop ---
+Exact observation given to the hero:
+{
+  "hole_cards": [
+    "3s",
+    "4c"
+  ],
+  "board": [
+    "8s",
+    "9c",
+    "8c"
+  ],
+  "street": "flop",
+  "my_seat": 2,
+  "button_seat": 1,
+  "actor_seat": 2,
+  "seats": [
+    {
+      "seat": 0,
+      "anon_id": "opp-e3305812",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 1,
+      "anon_id": "opp-ab67d329",
+      "stack": 7401,
+      "bet_this_street": 0,
+      "total_contributed": 395,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BTN/SB"
+    },
+    {
+      "seat": 2,
+      "anon_id": "opp-cae754c0",
+      "stack": 7809,
+      "bet_this_street": 0,
+      "total_contributed": 395,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BB"
+    },
+    {
+      "seat": 3,
+      "anon_id": "opp-ecf89d82",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 4,
+      "anon_id": "opp-bd217b6d",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 5,
+      "anon_id": "opp-2741f531",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 6,
+      "anon_id": "opp-401aaba5",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 7,
+      "anon_id": "opp-21dffcca",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    }
+  ],
+  "pot_total": 790,
+  "pot_breakdown": [
+    [
+      790,
+      [
+        2,
+        1
+      ]
+    ]
+  ],
+  "small_blind": 75,
+  "big_blind": 150,
+  "level": 4,
+  "players_remaining": 2,
+  "to_call": 0,
+  "legal": {
+    "can_fold": false,
+    "can_check": true,
+    "can_call": false,
+    "call_amount": 0,
+    "min_raise_to": 150,
+    "max_raise_to": 7809
+  },
+  "action_history": [
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "preflop",
+      "kind": "raise",
+      "amount": 395
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "preflop",
+      "kind": "call",
+      "amount": 245
+    }
+  ],
+  "hand_number": 120,
+  "hands_remaining": 80,
+  "payouts": [
+    100.0,
+    60.0,
+    40.0,
+    25.0,
+    15.0,
+    10.0,
+    5.0,
+    0.0
+  ]
+}
+Applied action: {'kind': 'CHECK', 'amount': None, 'diag': None}
+Outcome, not a demonstrable mistake under the review rules.
+
+--- Hero decision 3: flop ---
+Exact observation given to the hero:
+{
+  "hole_cards": [
+    "3s",
+    "4c"
+  ],
+  "board": [
+    "8s",
+    "9c",
+    "8c"
+  ],
+  "street": "flop",
+  "my_seat": 2,
+  "button_seat": 1,
+  "actor_seat": 2,
+  "seats": [
+    {
+      "seat": 0,
+      "anon_id": "opp-e3305812",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 1,
+      "anon_id": "opp-ab67d329",
+      "stack": 6754,
+      "bet_this_street": 647,
+      "total_contributed": 1042,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BTN/SB"
+    },
+    {
+      "seat": 2,
+      "anon_id": "opp-cae754c0",
+      "stack": 7809,
+      "bet_this_street": 0,
+      "total_contributed": 395,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BB"
+    },
+    {
+      "seat": 3,
+      "anon_id": "opp-ecf89d82",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 4,
+      "anon_id": "opp-bd217b6d",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 5,
+      "anon_id": "opp-2741f531",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 6,
+      "anon_id": "opp-401aaba5",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 7,
+      "anon_id": "opp-21dffcca",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    }
+  ],
+  "pot_total": 1437,
+  "pot_breakdown": [
+    [
+      790,
+      [
+        2,
+        1
+      ]
+    ]
+  ],
+  "small_blind": 75,
+  "big_blind": 150,
+  "level": 4,
+  "players_remaining": 2,
+  "to_call": 647,
+  "legal": {
+    "can_fold": true,
+    "can_check": false,
+    "can_call": true,
+    "call_amount": 647,
+    "min_raise_to": 1294,
+    "max_raise_to": 7809
+  },
+  "action_history": [
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "preflop",
+      "kind": "raise",
+      "amount": 395
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "preflop",
+      "kind": "call",
+      "amount": 245
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "flop",
+      "kind": "check",
+      "amount": 0
+    },
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "flop",
+      "kind": "raise",
+      "amount": 647
+    }
+  ],
+  "hand_number": 120,
+  "hands_remaining": 80,
+  "payouts": [
+    100.0,
+    60.0,
+    40.0,
+    25.0,
+    15.0,
+    10.0,
+    5.0,
+    0.0
+  ]
+}
+Applied action: {'kind': 'CALL', 'amount': None, 'diag': None}
+Outcome, not a demonstrable mistake under the review rules.
+
+--- Hero decision 4: turn ---
+Exact observation given to the hero:
+{
+  "hole_cards": [
+    "3s",
+    "4c"
+  ],
+  "board": [
+    "8s",
+    "9c",
+    "8c",
+    "Kd"
+  ],
+  "street": "turn",
+  "my_seat": 2,
+  "button_seat": 1,
+  "actor_seat": 2,
+  "seats": [
+    {
+      "seat": 0,
+      "anon_id": "opp-e3305812",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 1,
+      "anon_id": "opp-ab67d329",
+      "stack": 6754,
+      "bet_this_street": 0,
+      "total_contributed": 1042,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BTN/SB"
+    },
+    {
+      "seat": 2,
+      "anon_id": "opp-cae754c0",
+      "stack": 7162,
+      "bet_this_street": 0,
+      "total_contributed": 1042,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BB"
+    },
+    {
+      "seat": 3,
+      "anon_id": "opp-ecf89d82",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 4,
+      "anon_id": "opp-bd217b6d",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 5,
+      "anon_id": "opp-2741f531",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 6,
+      "anon_id": "opp-401aaba5",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 7,
+      "anon_id": "opp-21dffcca",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    }
+  ],
+  "pot_total": 2084,
+  "pot_breakdown": [
+    [
+      2084,
+      [
+        2,
+        1
+      ]
+    ]
+  ],
+  "small_blind": 75,
+  "big_blind": 150,
+  "level": 4,
+  "players_remaining": 2,
+  "to_call": 0,
+  "legal": {
+    "can_fold": false,
+    "can_check": true,
+    "can_call": false,
+    "call_amount": 0,
+    "min_raise_to": 150,
+    "max_raise_to": 7162
+  },
+  "action_history": [
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "preflop",
+      "kind": "raise",
+      "amount": 395
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "preflop",
+      "kind": "call",
+      "amount": 245
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "flop",
+      "kind": "check",
+      "amount": 0
+    },
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "flop",
+      "kind": "raise",
+      "amount": 647
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "flop",
+      "kind": "call",
+      "amount": 647
+    }
+  ],
+  "hand_number": 120,
+  "hands_remaining": 80,
+  "payouts": [
+    100.0,
+    60.0,
+    40.0,
+    25.0,
+    15.0,
+    10.0,
+    5.0,
+    0.0
+  ]
+}
+Applied action: {'kind': 'CHECK', 'amount': None, 'diag': None}
+Outcome, not a demonstrable mistake under the review rules.
+
+--- Hero decision 5: turn ---
+Exact observation given to the hero:
+{
+  "hole_cards": [
+    "3s",
+    "4c"
+  ],
+  "board": [
+    "8s",
+    "9c",
+    "8c",
+    "Kd"
+  ],
+  "street": "turn",
+  "my_seat": 2,
+  "button_seat": 1,
+  "actor_seat": 2,
+  "seats": [
+    {
+      "seat": 0,
+      "anon_id": "opp-e3305812",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 1,
+      "anon_id": "opp-ab67d329",
+      "stack": 5046,
+      "bet_this_street": 1708,
+      "total_contributed": 2750,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BTN/SB"
+    },
+    {
+      "seat": 2,
+      "anon_id": "opp-cae754c0",
+      "stack": 7162,
+      "bet_this_street": 0,
+      "total_contributed": 1042,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BB"
+    },
+    {
+      "seat": 3,
+      "anon_id": "opp-ecf89d82",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 4,
+      "anon_id": "opp-bd217b6d",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 5,
+      "anon_id": "opp-2741f531",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 6,
+      "anon_id": "opp-401aaba5",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 7,
+      "anon_id": "opp-21dffcca",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    }
+  ],
+  "pot_total": 3792,
+  "pot_breakdown": [
+    [
+      2084,
+      [
+        2,
+        1
+      ]
+    ]
+  ],
+  "small_blind": 75,
+  "big_blind": 150,
+  "level": 4,
+  "players_remaining": 2,
+  "to_call": 1708,
+  "legal": {
+    "can_fold": true,
+    "can_check": false,
+    "can_call": true,
+    "call_amount": 1708,
+    "min_raise_to": 3416,
+    "max_raise_to": 7162
+  },
+  "action_history": [
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "preflop",
+      "kind": "raise",
+      "amount": 395
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "preflop",
+      "kind": "call",
+      "amount": 245
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "flop",
+      "kind": "check",
+      "amount": 0
+    },
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "flop",
+      "kind": "raise",
+      "amount": 647
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "flop",
+      "kind": "call",
+      "amount": 647
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "turn",
+      "kind": "check",
+      "amount": 0
+    },
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "turn",
+      "kind": "raise",
+      "amount": 1708
+    }
+  ],
+  "hand_number": 120,
+  "hands_remaining": 80,
+  "payouts": [
+    100.0,
+    60.0,
+    40.0,
+    25.0,
+    15.0,
+    10.0,
+    5.0,
+    0.0
+  ]
+}
+Applied action: {'kind': 'CALL', 'amount': None, 'diag': None}
+Outcome, not a demonstrable mistake under the review rules.
+
+--- Hero decision 6: river ---
+Exact observation given to the hero:
+{
+  "hole_cards": [
+    "3s",
+    "4c"
+  ],
+  "board": [
+    "8s",
+    "9c",
+    "8c",
+    "Kd",
+    "3h"
+  ],
+  "street": "river",
+  "my_seat": 2,
+  "button_seat": 1,
+  "actor_seat": 2,
+  "seats": [
+    {
+      "seat": 0,
+      "anon_id": "opp-e3305812",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 1,
+      "anon_id": "opp-ab67d329",
+      "stack": 5046,
+      "bet_this_street": 0,
+      "total_contributed": 2750,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BTN/SB"
+    },
+    {
+      "seat": 2,
+      "anon_id": "opp-cae754c0",
+      "stack": 5454,
+      "bet_this_street": 0,
+      "total_contributed": 2750,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BB"
+    },
+    {
+      "seat": 3,
+      "anon_id": "opp-ecf89d82",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 4,
+      "anon_id": "opp-bd217b6d",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 5,
+      "anon_id": "opp-2741f531",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 6,
+      "anon_id": "opp-401aaba5",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 7,
+      "anon_id": "opp-21dffcca",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    }
+  ],
+  "pot_total": 5500,
+  "pot_breakdown": [
+    [
+      5500,
+      [
+        2,
+        1
+      ]
+    ]
+  ],
+  "small_blind": 75,
+  "big_blind": 150,
+  "level": 4,
+  "players_remaining": 2,
+  "to_call": 0,
+  "legal": {
+    "can_fold": false,
+    "can_check": true,
+    "can_call": false,
+    "call_amount": 0,
+    "min_raise_to": 150,
+    "max_raise_to": 5454
+  },
+  "action_history": [
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "preflop",
+      "kind": "raise",
+      "amount": 395
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "preflop",
+      "kind": "call",
+      "amount": 245
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "flop",
+      "kind": "check",
+      "amount": 0
+    },
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "flop",
+      "kind": "raise",
+      "amount": 647
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "flop",
+      "kind": "call",
+      "amount": 647
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "turn",
+      "kind": "check",
+      "amount": 0
+    },
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "turn",
+      "kind": "raise",
+      "amount": 1708
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "turn",
+      "kind": "call",
+      "amount": 1708
+    }
+  ],
+  "hand_number": 120,
+  "hands_remaining": 80,
+  "payouts": [
+    100.0,
+    60.0,
+    40.0,
+    25.0,
+    15.0,
+    10.0,
+    5.0,
+    0.0
+  ]
+}
+Applied action: {'kind': 'CHECK', 'amount': None, 'diag': None}
+Outcome, not a demonstrable mistake under the review rules.
+
+--- Hero decision 7: river ---
+Exact observation given to the hero:
+{
+  "hole_cards": [
+    "3s",
+    "4c"
+  ],
+  "board": [
+    "8s",
+    "9c",
+    "8c",
+    "Kd",
+    "3h"
+  ],
+  "street": "river",
+  "my_seat": 2,
+  "button_seat": 1,
+  "actor_seat": 2,
+  "seats": [
+    {
+      "seat": 0,
+      "anon_id": "opp-e3305812",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 1,
+      "anon_id": "opp-ab67d329",
+      "stack": 536,
+      "bet_this_street": 4510,
+      "total_contributed": 7260,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BTN/SB"
+    },
+    {
+      "seat": 2,
+      "anon_id": "opp-cae754c0",
+      "stack": 5454,
+      "bet_this_street": 0,
+      "total_contributed": 2750,
+      "folded": false,
+      "all_in": false,
+      "active": true,
+      "position": "BB"
+    },
+    {
+      "seat": 3,
+      "anon_id": "opp-ecf89d82",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 4,
+      "anon_id": "opp-bd217b6d",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 5,
+      "anon_id": "opp-2741f531",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 6,
+      "anon_id": "opp-401aaba5",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    },
+    {
+      "seat": 7,
+      "anon_id": "opp-21dffcca",
+      "stack": 0,
+      "bet_this_street": 0,
+      "total_contributed": 0,
+      "folded": true,
+      "all_in": false,
+      "active": false,
+      "position": "OUT"
+    }
+  ],
+  "pot_total": 10010,
+  "pot_breakdown": [
+    [
+      5500,
+      [
+        2,
+        1
+      ]
+    ]
+  ],
+  "small_blind": 75,
+  "big_blind": 150,
+  "level": 4,
+  "players_remaining": 2,
+  "to_call": 4510,
+  "legal": {
+    "can_fold": true,
+    "can_check": false,
+    "can_call": true,
+    "call_amount": 4510,
+    "min_raise_to": 5454,
+    "max_raise_to": 5454
+  },
+  "action_history": [
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "preflop",
+      "kind": "raise",
+      "amount": 395
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "preflop",
+      "kind": "call",
+      "amount": 245
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "flop",
+      "kind": "check",
+      "amount": 0
+    },
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "flop",
+      "kind": "raise",
+      "amount": 647
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "flop",
+      "kind": "call",
+      "amount": 647
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "turn",
+      "kind": "check",
+      "amount": 0
+    },
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "turn",
+      "kind": "raise",
+      "amount": 1708
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "turn",
+      "kind": "call",
+      "amount": 1708
+    },
+    {
+      "seat_anon": "opp-cae754c0",
+      "street": "river",
+      "kind": "check",
+      "amount": 0
+    },
+    {
+      "seat_anon": "opp-ab67d329",
+      "street": "river",
+      "kind": "raise",
+      "amount": 4510
+    }
+  ],
+  "hand_number": 120,
+  "hands_remaining": 80,
+  "payouts": [
+    100.0,
+    60.0,
+    40.0,
+    25.0,
+    15.0,
+    10.0,
+    5.0,
+    0.0
+  ]
+}
+Applied action: {'kind': 'CALL', 'amount': None, 'diag': None}
+Outcome, not a demonstrable mistake under the review rules.
+Board: ['8s', '9c', '8c', 'Kd', '3h']
+Shown showdown cards: [[1, ['Qs', '8h']]]
+The hand result is an outcome; only the explicit flags above are demonstrable mistakes.
+### v2: tightened preflop, same seeds
+Run directory: /home/ubuntu/repos/poker-practice/runs/20261028T223137Z_b485a8
+SNGs: 200 completed, 0 failed
+Throughput: 8.72 SNGs/s; 1531.33 hands/s
+Hero mean points: 36.834 ± 1.044 SE (n=200)
+Hero mean hands played: 175.7
+Stats definitions: VPIP = voluntary preflop call/raise per hand with a preflop decision (walks excluded); PFR = preflop raise per same opportunity; AF = postflop bets+raises/calls; AFq = postflop bets+raises over all postflop decisions; WTSD = showdowns/saw-flop hands for players not folded preflop; W$SD = hands winning any chips at showdown/showdowns. Positions are BTN, SB, BB, UTG.., CO by live-seat count (heads-up: BTN/SB, BB); stack BB buckets are <10, 10-20, 20-40, 40-100, 100+. Counts are decision opportunities.
+calling_station: VPIP 0.927 (5922 opp), PFR 0.006 (5922 opp), AF 0.039 (2254 calls), AFq 0.005 (18343 decisions), WTSD 0.998 (5925 saw flop), W$SD 0.384 (5916 showdowns); latency µs med/p95/p99/max=14.3/22.6/27.7/10169.2; failures exception=0, invalid_action=0, timeout_soft=14, timeout_hard=0
+  Position decisions: BTN=4746, BTN/SB=443, SB=5112, BB=3347, UTG=3638, MP1=2414, MP2=904, MP3=175, CO=4555; stack BB decisions: <10=1650, 10-20=2250, 20-40=3660, 40-100=6715, 100+=11059
+equity: VPIP 0.374 (22206 opp), PFR 0.110 (22206 opp), AF 1.488 (1423 calls), AFq 0.078 (27179 decisions), WTSD 0.840 (9525 saw flop), W$SD 0.500 (7997 showdowns); latency µs med/p95/p99/max=145.7/241.5/332.5/13133.7; failures exception=0, invalid_action=0, timeout_soft=280, timeout_hard=0
+  Position decisions: BTN=10352, BTN/SB=4419, SB=9212, BB=12153, UTG=3983, MP1=1927, MP2=462, MP3=94, CO=7762; stack BB decisions: <10=1891, 10-20=3739, 20-40=11103, 40-100=21384, 100+=12247
+hero: VPIP 0.021 (24484 opp), PFR 0.000 (24484 opp), AF 0.000 (979 calls), AFq 0.000 (9405 decisions), WTSD 1.000 (3167 saw flop), W$SD 0.443 (3167 showdowns); latency µs med/p95/p99/max=3.6/5.1/6.8/4066.8; failures exception=0, invalid_action=0, timeout_soft=7, timeout_hard=0
+  Position decisions: BTN=6273, BTN/SB=432, SB=6194, BB=12808, UTG=2509, MP1=1056, MP2=253, MP3=47, CO=4425; stack BB decisions: <10=8801, 10-20=5585, 20-40=6135, 40-100=11803, 100+=1673
+lag: VPIP 0.477 (11150 opp), PFR 0.263 (11150 opp), AF 3.267 (793 calls), AFq 0.189 (13727 decisions), WTSD 0.846 (5000 saw flop), W$SD 0.451 (4232 showdowns); latency µs med/p95/p99/max=12.1/23.7/28.9/3634.7; failures exception=0, invalid_action=0, timeout_soft=25, timeout_hard=0
+  Position decisions: BTN=5383, BTN/SB=1860, SB=4748, BB=5630, UTG=2100, MP1=1419, MP2=521, MP3=89, CO=3661; stack BB decisions: <10=1054, 10-20=1525, 20-40=3378, 40-100=10643, 100+=8811
+maniac: VPIP 0.841 (2128 opp), PFR 0.693 (2128 opp), AF 14.780 (127 calls), AFq 0.688 (2730 decisions), WTSD 0.672 (1319 saw flop), W$SD 0.341 (886 showdowns); latency µs med/p95/p99/max=13.2/24.0/30.3/4052.0; failures exception=0, invalid_action=0, timeout_soft=4, timeout_hard=0
+  Position decisions: BTN=992, BTN/SB=123, SB=947, BB=827, UTG=531, MP1=416, MP2=214, MP3=115, CO=887; stack BB decisions: <10=87, 10-20=100, 20-40=237, 40-100=1225, 100+=3403
+nit: VPIP 0.093 (23226 opp), PFR 0.014 (23226 opp), AF 0.273 (1007 calls), AFq 0.021 (13314 decisions), WTSD 0.908 (4596 saw flop), W$SD 0.483 (4174 showdowns); latency µs med/p95/p99/max=7.8/22.2/27.1/3248.5; failures exception=0, invalid_action=0, timeout_soft=21, timeout_hard=0
+  Position decisions: BTN=7143, BTN/SB=1126, SB=6687, BB=12098, UTG=2887, MP1=1281, MP2=283, MP3=54, CO=5343; stack BB decisions: <10=7506, 10-20=6257, 20-40=6815, 40-100=12836, 100+=3488
+short_stack: VPIP 0.290 (18708 opp), PFR 0.089 (18708 opp), AF 0.809 (1375 calls), AFq 0.059 (18946 decisions), WTSD 0.886 (6601 saw flop), W$SD 0.481 (5851 showdowns); latency µs med/p95/p99/max=12.4/22.8/27.7/5049.2; failures exception=0, invalid_action=0, timeout_soft=20, timeout_hard=0
+  Position decisions: BTN=7887, BTN/SB=2240, SB=7416, BB=9824, UTG=3022, MP1=1755, MP2=447, MP3=78, CO=5705; stack BB decisions: <10=1286, 10-20=4477, 20-40=9802, 40-100=14612, 100+=8197
+tag: VPIP 0.261 (19668 opp), PFR 0.091 (19668 opp), AF 1.293 (1268 calls), AFq 0.088 (18647 decisions), WTSD 0.877 (6497 saw flop), W$SD 0.482 (5698 showdowns); latency µs med/p95/p99/max=10.2/23.2/28.2/3194.1; failures exception=0, invalid_action=0, timeout_soft=27, timeout_hard=0
+  Position decisions: BTN=7887, BTN/SB=2197, SB=7125, BB=10602, UTG=3153, MP1=1652, MP2=435, MP3=82, CO=5873; stack BB decisions: <10=3391, 10-20=4477, 20-40=8342, 40-100=14840, 100+=7956
+### Paired comparison
+Paired shared seeds: n=200, mean B-A=23.464, SE=1.709, 95% normal CI [20.114, 26.813], bootstrap 95% CI [20.097, 26.687]
+Unpaired reference: A n=200 mean=13.370; B n=200 mean=36.834; B-A=23.464 ± 3.452 95% normal CI
+Caveat: shared seeds preserve initial deals and seats, but game states diverge after the first differing decision.

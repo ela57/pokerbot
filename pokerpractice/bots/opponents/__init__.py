@@ -2,5 +2,24 @@
 
 from .check_call import CheckCallOpponent
 from .random_legal import RandomLegalOpponent
+from .strategies import (
+    CallingStationBot,
+    EquityBot,
+    LAGBot,
+    ManiacBot,
+    NitBot,
+    ShortStackBot,
+    TAGBot,
+)
 
-__all__ = ["CheckCallOpponent", "RandomLegalOpponent"]
+__all__ = [
+    "CallingStationBot",
+    "CheckCallOpponent",
+    "EquityBot",
+    "LAGBot",
+    "ManiacBot",
+    "NitBot",
+    "RandomLegalOpponent",
+    "ShortStackBot",
+    "TAGBot",
+]

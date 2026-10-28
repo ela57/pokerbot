@@ -21,9 +21,10 @@ def test_three_player_hand_computed_icm():
 
 
 def test_icm_is_not_chip_proportion_for_flat_top_payouts():
-    values = icm_values((80, 10, 10), (100, 100, 100))
-    assert values[0] == pytest.approx(100)
-    assert values[0] < 240  # proportional share of the 300 prize pool
+    # P1=4/5; P2=(1/10)(8/9)+(1/10)(8/9)=8/45; P3=1/45.
+    values = icm_values((80, 10, 10), (50, 30, 20))
+    assert values[0] == pytest.approx(412 / 9)
+    assert values[0] < 80  # proportional share of the 100 prize pool
 
 
 def test_simultaneous_eliminations_rank_starting_stacks_and_split_ties():

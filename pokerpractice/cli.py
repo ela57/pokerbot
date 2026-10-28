@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import math
 import os
+import sqlite3
 import statistics
+import tempfile
 from dataclasses import asdict
 from pathlib import Path
 
@@ -24,6 +26,7 @@ def _add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--label")
     parser.add_argument("--log-level", choices=("full", "hero", "summary"))
     parser.add_argument("--config-dir", type=Path, default=_root() / "configs")
+    parser.add_argument("--hero", type=Path, default=_root() / "bots" / "my_bot.py")
 
 
 def _seed_base(seed_set: str) -> int:
@@ -41,7 +44,9 @@ def _specs(rows: list[dict]) -> tuple[OpponentSpec, ...]:
     )
 
 
-def _manifest(run_dir, rules, timing, logging_config, roster, seeds, label, root) -> None:
+def _manifest(
+    run_dir, rules, timing, logging_config, roster, seeds, label, root, hero_path
+) -> None:
     write_manifest(
         run_dir,
         asdict(rules),
@@ -51,6 +56,7 @@ def _manifest(run_dir, rules, timing, logging_config, roster, seeds, label, root
         seeds,
         label,
         root,
+        hero_path,
     )
 
 
@@ -76,6 +82,15 @@ def _print_results(rows: list[dict], elapsed: float, run_dir: Path) -> None:
         "<10, 10-20, 20-40, 40-100, 100+. Counts are decision opportunities."
     )
     aggregates: dict[str, dict] = {}
+    latency_by_label: dict[str, list[int]] = {}
+    try:
+        with sqlite3.connect(run_dir / "results.sqlite") as connection:
+            for label, latency in connection.execute(
+                "SELECT bot_label, latency_ns FROM decisions"
+            ):
+                latency_by_label.setdefault(label, []).append(latency)
+    except sqlite3.Error:
+        pass
     for row in completed:
         for label, stat in row.get("stats", {}).items():
             aggregate = aggregates.setdefault(
@@ -97,7 +112,6 @@ def _print_results(rows: list[dict], elapsed: float, run_dir: Path) -> None:
                 "wtsd_count", "wtsd_opportunities", "wusd_count", "wusd_opportunities",
             ):
                 aggregate[key] += stat.get(key, 0)
-            aggregate["latencies_ns"].extend(stat.get("latencies_ns", ()))
             for key in ("position_decisions", "stack_bucket_decisions"):
                 for name, count in stat.get(key, {}).items():
                     aggregate[key][name] = aggregate[key].get(name, 0) + count
@@ -105,6 +119,8 @@ def _print_results(rows: list[dict], elapsed: float, run_dir: Path) -> None:
                 aggregate["failure_counts"][failure] = (
                     aggregate["failure_counts"].get(failure, 0) + count
                 )
+    for label, aggregate in aggregates.items():
+        aggregate["latencies_ns"] = latency_by_label.get(label, [])
     for label, stat in sorted(aggregates.items()):
         latencies = sorted(stat["latencies_ns"])
 
@@ -169,6 +185,34 @@ def _print_results(rows: list[dict], elapsed: float, run_dir: Path) -> None:
         print(f"  Position decisions: {position_text}; stack BB decisions: {bucket_text}")
 
 
+def _bench(args, rules, timing, logging_config, roster, seeds) -> int:
+    runs_root = _root() / "runs"
+    runs_root.mkdir(parents=True, exist_ok=True)
+    for workers in sorted({1, 8}):
+        with tempfile.TemporaryDirectory(prefix=f"bench-{workers}-", dir=runs_root) as path:
+            run_dir = Path(path)
+            _manifest(
+                run_dir, rules, timing, logging_config, roster, seeds,
+                f"bench-{workers}-workers", _root(), args.hero,
+            )
+            rows, elapsed = run_batch(
+                seeds, workers, rules, timing, roster, run_dir,
+                "summary", hero_path=args.hero,
+            )
+            completed = [row for row in rows if not row.get("failed")]
+            hands = sum(row.get("hands_played", 0) for row in completed)
+            sng_rate = len(completed) / max(elapsed, 1e-9)
+            hand_rate = hands / max(elapsed, 1e-9)
+            estimate = 10_000 / max(sng_rate, 1e-9)
+            print(
+                f"{workers} worker(s): {len(completed)}/{len(rows)} SNGs, "
+                f"{hands} hands in {elapsed:.2f}s; {sng_rate:.2f} SNG/s, "
+                f"{hand_rate:.2f} hands/s; estimated 10,000 SNGs: {estimate / 60:.1f} min"
+            )
+    print("Reference: phase-1 raw PokerKit achieved approximately 300 hands/s.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="poker-practice")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -179,22 +223,96 @@ def main(argv: list[str] | None = None) -> int:
     _add_common(batch_parser)
     batch_parser.add_argument("-n", type=int, default=100)
     batch_parser.add_argument("--workers", type=int, default=os.cpu_count() or 1)
+    profile_parser = commands.add_parser("profile", help="profile opponent styles")
+    _add_common(profile_parser)
+    profile_parser.add_argument("-n", type=int, default=200)
+    profile_parser.add_argument("--workers", type=int, default=1)
+    bench_parser = commands.add_parser("bench", help="benchmark worker throughput")
+    _add_common(bench_parser)
+    bench_parser.add_argument("-n", type=int, default=100)
+    bench_parser.add_argument("--workers", type=int, default=8)
+    report_parser = commands.add_parser("report", help="report saved run metrics")
+    report_parser.add_argument("run_dir", type=Path)
+    hands_parser = commands.add_parser("hands", help="browse saved hands")
+    hands_parser.add_argument("run_dir", type=Path)
+    hands_parser.add_argument("--biggest-wins", type=int)
+    hands_parser.add_argument("--biggest-losses", type=int)
+    decisions_parser = commands.add_parser("decisions", help="filter saved decisions")
+    decisions_parser.add_argument("run_dir", type=Path)
+    decisions_parser.add_argument("--street")
+    decisions_parser.add_argument("--position")
+    decisions_parser.add_argument("--stack-bucket")
+    decisions_parser.add_argument("--opponent-style")
+    decisions_parser.add_argument("--failure")
+    replay_parser = commands.add_parser("replay", help="replay a saved hand")
+    replay_parser.add_argument("run_dir", type=Path)
+    replay_parser.add_argument("--sng", type=int, required=True)
+    replay_parser.add_argument("--hand", type=int, required=True)
+    replay_parser.add_argument("--view", choices=("hero", "omniscient"), default="hero")
+    replay_parser.add_argument("--equity", action="store_true")
+    compare_parser = commands.add_parser("compare", help="compare two saved runs")
+    compare_parser.add_argument("run_a", type=Path)
+    compare_parser.add_argument("run_b", type=Path)
+    compare_parser.add_argument("--bootstrap-seed", type=int, default=20260217)
+    aggregate_parser = commands.add_parser("aggregate6", help="aggregate six saved runs")
+    aggregate_parser.add_argument("run_dirs", nargs=6, type=Path)
     args = parser.parse_args(argv)
-    if args.command == "batch" and args.n < 1:
+    if args.command in {"hands", "decisions", "report", "replay", "compare", "aggregate6"}:
+        from pokerpractice import analysis
+
+        if args.command == "report":
+            analysis.report(args.run_dir)
+        elif args.command == "hands":
+            losses = args.biggest_losses is not None
+            count = args.biggest_losses if losses else args.biggest_wins or 20
+            analysis.biggest_hands(args.run_dir, count, losses)
+        elif args.command == "decisions":
+            analysis.filtered_decisions(
+                args.run_dir, street=args.street, position=args.position,
+                stack_bucket=args.stack_bucket, opponent_style=args.opponent_style,
+                failure=args.failure,
+            )
+        elif args.command == "replay":
+            analysis.replay_hand(
+                args.run_dir, args.sng, args.hand,
+                omniscient=args.view == "omniscient", show_equity=args.equity,
+            )
+        elif args.command == "compare":
+            analysis.compare_runs(args.run_a, args.run_b, args.bootstrap_seed)
+        else:
+            analysis.aggregate_six(args.run_dirs)
+        return 0
+    if args.command in {"batch", "profile", "bench"} and args.n < 1:
         parser.error("-n must be at least 1")
     rules, timing, logging_config, roster_rows = load_configs(args.config_dir)
     roster = _specs(roster_rows)
     seed = args.seed if args.seed is not None else _seed_base(args.seed_set)
     seeds = [seed] if args.command == "run" else [seed + index for index in range(args.n)]
+    if args.command == "bench":
+        return _bench(args, rules, timing, logging_config, roster, seeds)
     log_level = args.log_level or (
-        logging_config.get("default_batch_level", "hero")
+        "summary"
+        if args.command == "profile"
+        else logging_config.get("default_batch_level", "hero")
         if args.command == "batch" and len(seeds) >= logging_config.get("default_batch_threshold", 1000)
         else logging_config.get("default_level", "full")
     )
     run_dir = create_run_dir(_root() / "runs")
-    _manifest(run_dir, rules, timing, logging_config, roster, seeds, args.label, _root())
+    _manifest(
+        run_dir,
+        rules,
+        timing,
+        logging_config,
+        roster,
+        seeds,
+        args.label,
+        _root(),
+        args.hero,
+    )
     if args.command == "run" and args.inline:
-        result = run_sng(seed, rules, timing, roster)
+        result = run_sng(
+            seed, rules, timing, roster, hero_path=args.hero, log_level=log_level
+        )
         write_direct_result(run_dir, result, log_level)
         rows = [{
             "failed": result.failed,
@@ -207,7 +325,18 @@ def main(argv: list[str] | None = None) -> int:
         elapsed = max(result.elapsed_ns / 1_000_000_000, 1e-9)
     else:
         workers = 1 if args.command == "run" else args.workers
-        rows, elapsed = run_batch(seeds, workers, rules, timing, roster, run_dir, log_level)
+        rows, elapsed = run_batch(
+            seeds,
+            workers,
+            rules,
+            timing,
+            roster,
+            run_dir,
+            log_level,
+            hero_path=args.hero,
+        )
+    if args.command == "profile":
+        print("Opponent profile (decision timing measured in competition mode):")
     _print_results(rows, elapsed, run_dir)
     if args.command == "run" and rows and not rows[0].get("failed", False):
         print(

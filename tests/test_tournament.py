@@ -68,6 +68,21 @@ def test_random_legal_actions_preserve_chips_for_many_sngs():
         assert all(row["failure_type"] != "invalid_action" for row in result.decision_records)
 
 
+def test_stats_include_position_depth_and_lineup_opportunities():
+    result = run_sng(
+        301,
+        RulesConfig(players=3, hand_cap=2),
+        TimingConfig(mode="dev", hard_timeout_ms=0),
+        _roster(3),
+        log_level="summary",
+    )
+    hero = result.stats["hero"]
+    assert hero["by_position"]
+    assert hero["by_stack_bucket"]
+    assert hero["by_lineup"]
+    assert all("vpip_opportunities" in row for row in hero["by_position"].values())
+
+
 def test_hidden_information_and_frozen_detached_observations():
     rules = RulesConfig(players=3, hand_cap=4)
     result = run_sng(
@@ -286,3 +301,42 @@ def test_hand_cap_settles_survivors_with_icm():
     assert result.points_by_seat == pytest.approx(
         icm_values(result.final_stacks, rules.payouts)
     )
+
+
+def test_opponent_styles_have_distinct_seeded_profile_ordering():
+    roster = tuple(
+        OpponentSpec(style, {})
+        for style in (
+            "nit", "tag", "lag", "calling_station",
+            "maniac", "equity", "short_stack",
+        )
+    )
+    rules = RulesConfig(hand_cap=40)
+    timing = TimingConfig(mode="dev", hard_timeout_ms=0)
+    totals = {}
+    for seed in range(80_000, 80_080):
+        result = run_sng(seed, rules, timing, roster, log_level="summary")
+        for style, stats in result.stats.items():
+            aggregate = totals.setdefault(
+                style,
+                {
+                    "vpip": 0, "vpip_opportunities": 0,
+                    "raises": 0, "calls": 0,
+                },
+            )
+            aggregate["vpip"] += stats["vpip_count"]
+            aggregate["vpip_opportunities"] += stats["vpip_opportunities"]
+            aggregate["raises"] += stats["af_numerator"]
+            aggregate["calls"] += stats["af_denominator"]
+    vpip = {
+        style: row["vpip"] / row["vpip_opportunities"]
+        for style, row in totals.items()
+    }
+    af = {
+        style: row["raises"] / row["calls"] if row["calls"] else 0
+        for style, row in totals.items()
+    }
+    assert vpip["calling_station"] > vpip["lag"] > vpip["tag"] > vpip["nit"]
+    assert vpip["maniac"] > vpip["lag"]
+    assert af["maniac"] > af["lag"] > af["tag"]
+    assert af["calling_station"] < af["tag"]
