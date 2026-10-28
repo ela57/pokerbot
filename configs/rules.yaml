@@ -1,0 +1,17 @@
+# ASSUMPTION: configurable practice settings; not official competition rules.
+players: 8
+starting_stack: 2000
+blind_level_hands: 25
+blind_levels:
+  - [10, 20]
+  - [15, 30]
+  - [25, 50]
+  - [50, 100]
+  - [75, 150]
+  - [100, 200]
+  - [150, 300]
+  - [200, 400]
+antes: 0
+rake: 0
+payouts: [100, 60, 40, 25, 15, 10, 5, 0]
+hand_cap: 200

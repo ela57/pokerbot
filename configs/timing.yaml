@@ -1,0 +1,4 @@
+mode: competition
+budget_ms: 1.0
+hard_timeout_ms: 50
+sng_wall_timeout_s: 120

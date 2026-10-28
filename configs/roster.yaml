@@ -1,0 +1,8 @@
+opponents:
+  - style: check_call
+  - style: random
+  - style: check_call
+  - style: random
+  - style: check_call
+  - style: random
+  - style: check_call

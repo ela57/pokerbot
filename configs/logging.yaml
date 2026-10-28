@@ -1,0 +1,4 @@
+default_batch_threshold: 1000
+default_batch_level: hero
+default_level: full
+snapshot_bot: true
