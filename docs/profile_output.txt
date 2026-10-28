@@ -1,0 +1,25 @@
+$ ./.venv/bin/poker-practice profile -n 200 --workers 1 --seed 3000000 --log-level full
+
+Opponent profile (decision timing measured in competition mode):
+Run directory: /home/ubuntu/repos/poker-practice/runs/20261028T224446Z_c8dc32
+SNGs: 200 completed, 0 failed
+Throughput: 1.55 SNGs/s; 273.86 hands/s
+Hero mean points: 35.967 ± 1.304 SE (n=200)
+Hero mean hands played: 176.5
+Stats definitions: VPIP = voluntary preflop call/raise per hand with a preflop decision (walks excluded); PFR = preflop raise per same opportunity; AF = postflop bets+raises/calls; AFq = postflop bets+raises over all postflop decisions; WTSD = showdowns/saw-flop hands for players not folded preflop; W$SD = hands winning any chips at showdown/showdowns. Positions are BTN, SB, BB, UTG.., CO by live-seat count (heads-up: BTN/SB, BB); stack BB buckets are <10, 10-20, 20-40, 40-100, 100+. Counts are decision opportunities.
+calling_station: VPIP 0.928 (3757 opp), PFR 0.005 (3757 opp), AF 0.024 (1964 calls), AFq 0.004 (11762 decisions), WTSD 0.998 (3759 saw flop), W$SD 0.374 (3751 showdowns); latency µs med/p95/p99/max=13.8/21.1/26.5/2063.9; failures exception=0, invalid_action=0, timeout_soft=1, timeout_hard=0
+  Position decisions: BTN=2974, BTN/SB=194, SB=3296, BB=2240, UTG=2429, MP1=1500, MP2=693, MP3=215, CO=2748; stack BB decisions: <10=652, 10-20=846, 20-40=1875, 40-100=4994, 100+=7922
+equity: VPIP 0.379 (21812 opp), PFR 0.110 (21812 opp), AF 1.174 (1812 calls), AFq 0.081 (26250 decisions), WTSD 0.822 (9247 saw flop), W$SD 0.505 (7604 showdowns); latency µs med/p95/p99/max=139.8/217.8/271.0/4208.2; failures exception=0, invalid_action=0, timeout_soft=144, timeout_hard=0
+  Position decisions: BTN=10805, BTN/SB=5042, SB=9277, BB=11410, UTG=3339, MP1=1641, MP2=376, MP3=86, CO=7159; stack BB decisions: <10=1819, 10-20=4561, 20-40=11450, 40-100=19079, 100+=12226
+hero: VPIP 0.016 (21993 opp), PFR 0.013 (21993 opp), AF 5.288 (316 calls), AFq 0.243 (6875 decisions), WTSD 0.829 (2562 saw flop), W$SD 0.400 (2125 showdowns); latency µs med/p95/p99/max=5.2/9.9/12.2/2055.2; failures exception=0, invalid_action=0, timeout_soft=3, timeout_hard=0
+  Position decisions: BTN=5237, BTN/SB=804, SB=5259, BB=10704, UTG=2149, MP1=869, MP2=201, MP3=54, CO=3625; stack BB decisions: <10=4847, 10-20=3993, 20-40=5620, 40-100=11881, 100+=2561
+lag: VPIP 0.474 (10612 opp), PFR 0.255 (10612 opp), AF 2.594 (932 calls), AFq 0.187 (12920 decisions), WTSD 0.838 (4674 saw flop), W$SD 0.449 (3916 showdowns); latency µs med/p95/p99/max=11.6/22.2/27.8/2071.2; failures exception=0, invalid_action=0, timeout_soft=13, timeout_hard=0
+  Position decisions: BTN=5171, BTN/SB=1432, SB=4706, BB=4966, UTG=2145, MP1=1396, MP2=466, MP3=106, CO=3707; stack BB decisions: <10=779, 10-20=1163, 20-40=3166, 40-100=9598, 100+=9389
+maniac: VPIP 0.867 (2563 opp), PFR 0.714 (2563 opp), AF 11.532 (158 calls), AFq 0.668 (2728 decisions), WTSD 0.607 (1431 saw flop), W$SD 0.329 (868 showdowns); latency µs med/p95/p99/max=11.0/22.9/28.4/1294.2; failures exception=0, invalid_action=0, timeout_soft=1, timeout_hard=0
+  Position decisions: BTN=1110, BTN/SB=295, SB=1083, BB=923, UTG=480, MP1=380, MP2=245, MP3=93, CO=928; stack BB decisions: <10=77, 10-20=95, 20-40=191, 40-100=1356, 100+=3818
+nit: VPIP 0.090 (23106 opp), PFR 0.014 (23106 opp), AF 0.196 (1269 calls), AFq 0.019 (12780 decisions), WTSD 0.893 (4398 saw flop), W$SD 0.506 (3928 showdowns); latency µs med/p95/p99/max=7.4/21.2/25.7/3198.1; failures exception=0, invalid_action=0, timeout_soft=16, timeout_hard=0
+  Position decisions: BTN=7053, BTN/SB=1552, SB=6802, BB=12060, UTG=2515, MP1=1054, MP2=240, MP3=36, CO=4901; stack BB decisions: <10=6774, 10-20=6101, 20-40=6966, 40-100=12593, 100+=3779
+short_stack: VPIP 0.292 (18306 opp), PFR 0.092 (18306 opp), AF 0.598 (1656 calls), AFq 0.055 (18094 decisions), WTSD 0.870 (6311 saw flop), W$SD 0.490 (5491 showdowns); latency µs med/p95/p99/max=11.9/21.9/27.2/2110.4; failures exception=0, invalid_action=0, timeout_soft=16, timeout_hard=0
+  Position decisions: BTN=7596, BTN/SB=2260, SB=7485, BB=9211, UTG=2993, MP1=1429, MP2=338, MP3=99, CO=5720; stack BB decisions: <10=1206, 10-20=4757, 20-40=9294, 40-100=14561, 100+=7313
+tag: VPIP 0.265 (18750 opp), PFR 0.091 (18750 opp), AF 1.120 (1403 calls), AFq 0.088 (17866 decisions), WTSD 0.861 (6218 saw flop), W$SD 0.501 (5354 showdowns); latency µs med/p95/p99/max=9.8/21.9/26.4/2070.5; failures exception=0, invalid_action=0, timeout_soft=11, timeout_hard=0
+  Position decisions: BTN=7231, BTN/SB=3029, SB=6862, BB=10336, UTG=2839, MP1=1464, MP2=356, MP3=47, CO=5140; stack BB decisions: <10=3038, 10-20=3974, 20-40=7620, 40-100=14436, 100+=8236

@@ -23,14 +23,12 @@ The default roster is Nit, TAG, LAG, calling station, maniac, equity/pot-odds, a
 
 ## Inspecting and comparing practice runs
 
-Runs are written to unique `runs/<UTC timestamp>_<short id>/` directories; an existing directory is never overwritten. A run contains a manifest and immutable source/config snapshot, `hands.jsonl.gz` (privileged hand data), `decisions.jsonl.gz` (agent-visible observation records, according to log level), `results.sqlite`, and worker shards for batches.
+Runs are written to unique `runs/<UTC timestamp>_<short id>/` directories; an existing directory is never overwritten. Every run contains a manifest, immutable source/config snapshot, and `results.sqlite`. `full` and `hero` also write hand and decision JSONL; `summary` writes neither JSONL file. Worker shards are removed after a successful merge by default; `--keep-shards` preserves them for debugging.
 
 Example end-to-end development loop:
 
-1. Preserve a version, then run a 200-SNG version-one batch:
+1. Run the checked-in short example as v1 on 200 tuning seeds:
    ```sh
-   mkdir -p bots/versions
-   cp bots/my_bot.py bots/versions/my_bot_v1.py
    uv run poker-practice batch -n 200 --workers 8 --seed 1000000 --hero bots/versions/my_bot_v1.py --label v1 --log-level hero
    ```
    Save the printed run directory as `RUN1`.
@@ -43,7 +41,7 @@ Example end-to-end development loop:
    uv run poker-practice replay "$RUN1" --sng 1000000 --hand 12 --view hero
    ```
    Substitute the seed and hand reported by `hands`. Optional offline equity uses `--equity`; it is explicitly labelled and is not part of the bot's decision.
-4. Tighten the preflop section in `bots/my_bot.py`, then run exactly the same seed range:
+4. The current `bots/my_bot.py` is v2: it widens the v1 postflop value-bet condition to include top pair. Run that documented edit on exactly the same seed range:
    ```sh
    uv run poker-practice batch -n 200 --workers 8 --seed 1000000 --hero bots/my_bot.py --label v2 --log-level hero
    ```
@@ -53,7 +51,15 @@ Example end-to-end development loop:
    uv run poker-practice compare "$RUN1" "$RUN2"
    ```
 
-Useful analysis commands are `report RUN`, `decisions RUN --street river --position BTN`, `hands RUN --biggest-wins 10`, `replay RUN --sng SEED --hand HAND --view omniscient`, `profile -n 200`, `bench -n 100`, and `aggregate6 RUN1 RUN2 RUN3 RUN4 RUN5 RUN6`. Use `--log-level full|hero|summary`; large batches default to hero decisions. `summary` still indexes all decisions in SQLite but omits detailed replay JSON.
+Useful analysis commands are `report RUN`, `decisions RUN --street river --position BTN`, `hands RUN --biggest-wins 10`, `replay RUN --sng SEED --hand HAND --view omniscient`, `profile -n 200`, `bench -n 100`, and `aggregate6 RUN1 RUN2 RUN3 RUN4 RUN5 RUN6`. Use `--log-level full|hero|summary`; large batches default to hero decisions. `report` and `compare` always retain outcome analysis. Summary logs omit decision, behavior, latency, and replay detail; hero logs retain the hero's observations and hero decision index, while all-style decision latency distributions require full logs.
+
+Measured size of a 100-SNG run directory (bytes; same seeds and roster):
+
+| Log level | 100 SNGs | Projection for 10,000 SNGs |
+|---|---:|---:|
+| full | 51,245,523 | 5,124,552,300 (5.12 GB) |
+| hero | 12,306,295 | 1,230,629,500 (1.23 GB) |
+| summary | 885,901 | 88,590,100 (88.6 MB) |
 
 ## Limits
 

@@ -38,6 +38,7 @@ class SNGResult:
     points_by_seat: tuple[float, ...]
     final_stacks: tuple[int, ...]
     hand_records: tuple[dict, ...]
+    hand_summaries: tuple[dict, ...]
     decision_records: tuple[dict, ...]
     stats: dict[str, dict]
     elapsed_ns: int
@@ -446,6 +447,7 @@ def run_sng(
     bust_finish: dict[int, int] = {}
     live = set(range(rules.players))
     hand_records: list[dict] = []
+    hand_summaries: list[dict] = []
     decision_records: list[dict] = []
     stats_hand_records: list[dict] = []
     hand_number = 0
@@ -584,6 +586,15 @@ def run_sng(
             "showdown_ranks": hand_result.showdown_ranks,
             "pots": [{"winners": pot.winners} for pot in hand_result.pots],
         })
+        hand_summaries.append({
+            "hand_number": hand_number,
+            "button": button,
+            "hero_delta": hand_result.chip_deltas[hero_seat],
+            "hero_position": positions.get(hero_seat, "OUT"),
+            "hero_stack_bb": starting[hero_seat] / big_blind if big_blind else None,
+            "showdown": bool(hand_result.showdown_ranks),
+            "eliminated_count": len(busted),
+        })
         if log_level != "summary":
             private_hand = {
                 "seed": seed,
@@ -655,6 +666,7 @@ def run_sng(
         points_by_seat=tuple(points),
         final_stacks=tuple(stacks),
         hand_records=tuple(hand_records),
+        hand_summaries=tuple(hand_summaries),
         decision_records=tuple(decision_records),
         stats=stats,
         elapsed_ns=time.perf_counter_ns() - started,

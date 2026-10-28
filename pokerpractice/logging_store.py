@@ -112,7 +112,8 @@ def _initialize_db(path: Path) -> None:
                 final_stack INTEGER,
                 busted INTEGER,
                 hands_played INTEGER,
-                failed INTEGER
+                failed INTEGER,
+                stats_json TEXT
             );
             CREATE TABLE hand_summaries (
                 seed INTEGER,
@@ -164,6 +165,17 @@ def _decision_index(row: dict) -> dict:
     }
 
 
+def _json_safe(value):
+    if isinstance(value, dict):
+        return {
+            "|".join(key) if isinstance(key, tuple) else key: _json_safe(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (tuple, list)):
+        return [_json_safe(item) for item in value]
+    return value
+
+
 def write_worker_shard(
     run_dir: Path,
     worker_id: int,
@@ -202,9 +214,22 @@ def write_worker_shard(
             if log_level != "summary"
             else []
         ),
-        "decision_index": [_decision_index(row) for row in result.decision_records],
+        "decision_index": (
+            [
+                _decision_index(row)
+                for row in result.decision_records
+                if log_level == "full" or row["bot_label"] == "hero"
+            ]
+            if log_level != "summary"
+            else []
+        ),
+        "hand_summaries": [
+            {"seed": result.seed, **row} for row in result.hand_summaries
+        ],
     }
-    payload["summary"]["stats"] = compact_stats
+    payload["summary"]["stats"] = (
+        _json_safe(compact_stats) if log_level != "summary" else None
+    )
     with gzip.open(temporary_path, "wt", encoding="utf-8") as stream:
         stream.write(json.dumps(payload, separators=(",", ":"), default=_json_default) + "\n")
     os.replace(temporary_path, path)
@@ -223,35 +248,28 @@ def _json_default(value: Any):
 def _insert_payload(connection: sqlite3.Connection, payload: dict) -> None:
     summary = payload["summary"]
     connection.execute(
-        "INSERT OR REPLACE INTO sngs VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT OR REPLACE INTO sngs "
+        "(seed, hero_seat, hero_finish, points, final_stack, busted, "
+        "hands_played, failed, stats_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             summary["seed"], summary["hero_seat"], summary["hero_finish"],
             summary["hero_points"], summary["hero_final_stack"],
             int(summary["hero_busted"]), summary["hands_played"], int(summary["failed"]),
+            json.dumps(summary["stats"], separators=(",", ":"))
+            if summary.get("stats") is not None else None,
         ),
     )
-    hero_seat = summary["hero_seat"]
-    for hand in payload["hands"]:
-        hero_delta = hand["chip_deltas"][hero_seat]
-        start_stack = hand["starting_stacks"][hero_seat]
-        blind = hand["blinds"][1]
-        hero_decision = next(
+    connection.executemany(
+        "INSERT OR REPLACE INTO hand_summaries VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (
             (
-                row for row in payload["decision_index"]
-                if row["hand_number"] == hand["hand_number"] and row["seat"] == hero_seat
-            ),
-            None,
-        )
-        connection.execute(
-            "INSERT OR REPLACE INTO hand_summaries VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                summary["seed"], hand["hand_number"], hand["button"], hero_delta,
-                hero_decision["position"] if hero_decision else None,
-                start_stack / blind if blind else None,
-                int(bool(hand["showdown_ranks"])),
-                len(hand["eliminations"]),
-            ),
-        )
+                row["seed"], row["hand_number"], row["button"], row["hero_delta"],
+                row["hero_position"], row["hero_stack_bb"], int(row["showdown"]),
+                row["eliminated_count"],
+            )
+            for row in payload.get("hand_summaries", ())
+        ),
+    )
     connection.executemany(
         "INSERT INTO decisions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
@@ -265,7 +283,7 @@ def _insert_payload(connection: sqlite3.Connection, payload: dict) -> None:
     )
 
 
-def merge_shards(run_dir: Path, log_level: str) -> None:
+def merge_shards(run_dir: Path, log_level: str, keep_shards: bool = False) -> None:
     hands_path = run_dir / "hands.jsonl.gz"
     decisions_path = run_dir / "decisions.jsonl.gz"
     hands_out = gzip.open(hands_path, "wt", encoding="utf-8") if log_level != "summary" else None
@@ -289,8 +307,13 @@ def merge_shards(run_dir: Path, log_level: str) -> None:
             hands_out.close()
         if decisions_out:
             decisions_out.close()
+    shards_dir = run_dir / "shards"
+    if not keep_shards and shards_dir.exists():
+        shutil.rmtree(shards_dir)
 
 
-def write_direct_result(run_dir: Path, result: SNGResult, log_level: str) -> None:
+def write_direct_result(
+    run_dir: Path, result: SNGResult, log_level: str, keep_shards: bool = False
+) -> None:
     write_worker_shard(run_dir, 0, result, log_level)
-    merge_shards(run_dir, log_level)
+    merge_shards(run_dir, log_level, keep_shards=keep_shards)

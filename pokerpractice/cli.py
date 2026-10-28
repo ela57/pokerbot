@@ -25,6 +25,10 @@ def _add_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--seed", type=int)
     parser.add_argument("--label")
     parser.add_argument("--log-level", choices=("full", "hero", "summary"))
+    parser.add_argument(
+        "--keep-shards", action="store_true",
+        help="keep per-SNG worker shards after a successful merge",
+    )
     parser.add_argument("--config-dir", type=Path, default=_root() / "configs")
     parser.add_argument("--hero", type=Path, default=_root() / "bots" / "my_bot.py")
 
@@ -45,8 +49,12 @@ def _specs(rows: list[dict]) -> tuple[OpponentSpec, ...]:
 
 
 def _manifest(
-    run_dir, rules, timing, logging_config, roster, seeds, label, root, hero_path
+    run_dir, rules, timing, logging_config, roster, seeds, label, root, hero_path,
+    log_level=None,
 ) -> None:
+    logging_config = dict(logging_config)
+    if log_level is not None:
+        logging_config["log_level"] = log_level
     write_manifest(
         run_dir,
         asdict(rules),
@@ -157,6 +165,13 @@ def _print_results(rows: list[dict], elapsed: float, run_dir: Path) -> None:
             f"{key}={stat['failure_counts'].get(key, 0)}"
             for key in ("exception", "invalid_action", "timeout_soft", "timeout_hard")
         )
+        latency_text = (
+            f"{statistics.median(latencies) / 1000 if latencies else 0:.1f}/"
+            f"{percentile(.95):.1f}/{percentile(.99):.1f}/"
+            f"{latencies[-1] / 1000 if latencies else 0:.1f}"
+            if latencies
+            else "not indexed; use --log-level full"
+        )
         print(
             f"{label}: VPIP {vpip} ({stat['vpip_opportunities']} opp), "
             f"PFR {pfr} ({stat['pfr_opportunities']} opp), "
@@ -164,10 +179,7 @@ def _print_results(rows: list[dict], elapsed: float, run_dir: Path) -> None:
             f"AFq {afq:.3f} ({stat['afq_denominator']} decisions), "
             f"WTSD {wtsd} ({stat['wtsd_opportunities']} saw flop), "
             f"W$SD {wusd} ({stat['wusd_opportunities']} showdowns); "
-            f"latency µs med/p95/p99/max="
-            f"{statistics.median(latencies) / 1000 if latencies else 0:.1f}/"
-            f"{percentile(.95):.1f}/{percentile(.99):.1f}/"
-            f"{latencies[-1] / 1000 if latencies else 0:.1f}; failures {failure_text}"
+            f"latency µs med/p95/p99/max={latency_text}; failures {failure_text}"
         )
         position_counts = stat["position_decisions"]
         position_order = ["BTN", "BTN/SB", "SB", "BB", "UTG", "MP1", "MP2", "MP3", "CO"]
@@ -193,11 +205,12 @@ def _bench(args, rules, timing, logging_config, roster, seeds) -> int:
             run_dir = Path(path)
             _manifest(
                 run_dir, rules, timing, logging_config, roster, seeds,
-                f"bench-{workers}-workers", _root(), args.hero,
+                f"bench-{workers}-workers", _root(), args.hero, "summary",
             )
             rows, elapsed = run_batch(
                 seeds, workers, rules, timing, roster, run_dir,
                 "summary", hero_path=args.hero,
+                keep_shards=args.keep_shards,
             )
             completed = [row for row in rows if not row.get("failed")]
             hands = sum(row.get("hands_played", 0) for row in completed)
@@ -291,7 +304,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "bench":
         return _bench(args, rules, timing, logging_config, roster, seeds)
     log_level = args.log_level or (
-        "summary"
+        "full"
         if args.command == "profile"
         else logging_config.get("default_batch_level", "hero")
         if args.command == "batch" and len(seeds) >= logging_config.get("default_batch_threshold", 1000)
@@ -308,12 +321,13 @@ def main(argv: list[str] | None = None) -> int:
         args.label,
         _root(),
         args.hero,
+        log_level,
     )
     if args.command == "run" and args.inline:
         result = run_sng(
             seed, rules, timing, roster, hero_path=args.hero, log_level=log_level
         )
-        write_direct_result(run_dir, result, log_level)
+        write_direct_result(run_dir, result, log_level, keep_shards=args.keep_shards)
         rows = [{
             "failed": result.failed,
             "hands_played": result.hands_played,
@@ -334,6 +348,7 @@ def main(argv: list[str] | None = None) -> int:
             run_dir,
             log_level,
             hero_path=args.hero,
+            keep_shards=args.keep_shards,
         )
     if args.command == "profile":
         print("Opponent profile (decision timing measured in competition mode):")

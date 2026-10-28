@@ -33,6 +33,29 @@ def _shard_payloads(run_dir: Path):
                 yield json.loads(line)
 
 
+def _stats_payloads(run_dir: Path) -> list[dict]:
+    with sqlite3.connect(run_dir / "results.sqlite") as connection:
+        try:
+            rows = connection.execute(
+                "SELECT stats_json FROM sngs WHERE failed=0 AND stats_json IS NOT NULL"
+            ).fetchall()
+        except sqlite3.OperationalError:
+            return [
+                payload["summary"].get("stats", {})
+                for payload in _shard_payloads(run_dir)
+                if not payload["summary"].get("failed")
+            ]
+    return [json.loads(row[0]) for row in rows]
+
+
+def _run_log_level(run_dir: Path) -> str:
+    try:
+        manifest = json.loads((run_dir / "manifest.json").read_text(encoding="utf-8"))
+        return manifest.get("config", {}).get("logging", {}).get("log_level", "full")
+    except (OSError, json.JSONDecodeError):
+        return "full"
+
+
 def _mean_se(values: list[float]) -> tuple[float, float]:
     if not values:
         return 0.0, 0.0
@@ -78,15 +101,13 @@ def report(run_dir: Path) -> None:
             print(f"Final stacks ({label}; n=0)")
 
     totals = {}
-    for payload in _shard_payloads(run_dir):
-        if payload["summary"].get("failed"):
-            continue
-        for label, stat in payload["summary"].get("stats", {}).items():
+    for stats_payload in _stats_payloads(run_dir):
+        for label, stat in stats_payload.items():
             acc = totals.setdefault(label, {
                 "vpip": 0, "vpip_opp": 0, "pfr": 0, "pfr_opp": 0,
                 "af_num": 0, "af_den": 0, "afq_num": 0, "afq_den": 0,
                 "wtsd": 0, "wtsd_opp": 0, "wusd": 0, "wusd_opp": 0,
-                "failures": 0, "positions": {}, "depths": {},
+                "failures": 0, "failure_counts": {}, "positions": {}, "depths": {},
                 "groups": {"by_position": {}, "by_stack_bucket": {}, "by_lineup": {}},
             })
             for target, source in (
@@ -99,6 +120,10 @@ def report(run_dir: Path) -> None:
             ):
                 acc[target] += stat.get(source, 0)
             acc["failures"] += stat.get("failure_count", 0)
+            for failure, count in stat.get("failure_counts", {}).items():
+                acc["failure_counts"][failure] = (
+                    acc["failure_counts"].get(failure, 0) + count
+                )
             for source, dest in (("position_decisions", "positions"), ("stack_bucket_decisions", "depths")):
                 for key, count in stat.get(source, {}).items():
                     acc[dest][key] = acc[dest].get(key, 0) + count
@@ -118,6 +143,17 @@ def report(run_dir: Path) -> None:
                     )
                     for metric in group_acc:
                         group_acc[metric] += group.get(metric, 0)
+    log_level = _run_log_level(run_dir)
+    if log_level == "summary" or not totals:
+        print(
+            "Decision-level bot metrics and replay require --log-level hero or full; "
+            "all-style decision latency and behavior reports require full."
+        )
+    elif log_level == "hero":
+        print(
+            "Only hero decisions are indexed/logged; opponent decision latency "
+            "distributions require --log-level full."
+        )
     print(
         "Definitions: VPIP=voluntary preflop call/raise per hand with a preflop decision; "
         "PFR=preflop raise per same opportunity; AF=(postflop bets+raises)/calls; "
@@ -143,6 +179,14 @@ def report(run_dir: Path) -> None:
             latencies[max(0, math.ceil(q * len(latencies)) - 1)] / 1000
             if latencies else 0.0
         )
+        latency_text = (
+            f"{statistics.median(latencies) / 1000 if latencies else 0:.1f}/"
+            f"{percentile(.95):.1f}/{percentile(.99):.1f}/"
+            f"{latencies[-1] / 1000 if latencies else 0:.1f}"
+            if latencies
+            else "not indexed; use --log-level full"
+        )
+        failures = failure_by_label.get(label, {}) or stat["failure_counts"]
         print(
             f"{label}: VPIP={stat['vpip']}/{stat['vpip_opp']} "
             f"({stat['vpip'] / stat['vpip_opp'] if stat['vpip_opp'] else 0:.3f}), "
@@ -150,11 +194,8 @@ def report(run_dir: Path) -> None:
             f"({stat['pfr'] / stat['pfr_opp'] if stat['pfr_opp'] else 0:.3f}), "
             f"AF={af:.3f} ({stat['af_den']} calls), AFq={afq:.3f} "
             f"({stat['afq_den']} decisions), WTSD={stat['wtsd']}/{stat['wtsd_opp']}, "
-            f"W$SD={stat['wusd']}/{stat['wusd_opp']}, failures={failure_by_label.get(label, {})}, "
-            f"latency µs med/p95/p99/max="
-            f"{statistics.median(latencies) / 1000 if latencies else 0:.1f}/"
-            f"{percentile(.95):.1f}/{percentile(.99):.1f}/"
-            f"{latencies[-1] / 1000 if latencies else 0:.1f}"
+            f"W$SD={stat['wusd']}/{stat['wusd_opp']}, failures={failures}, "
+            f"latency µs med/p95/p99/max={latency_text}"
         )
         print(f"  Decisions by position: {stat['positions']}; stack depth BB: {stat['depths']}")
         for category, title in (
@@ -280,6 +321,17 @@ def compare_runs(run_a: Path, run_b: Path, seed: int = 20260217) -> None:
         f"± {1.96 * unpaired_se:.3f} 95% normal CI"
     )
     print("Caveat: shared seeds preserve initial deals and seats, but game states diverge after the first differing decision.")
+    levels = {_run_log_level(run_a), _run_log_level(run_b)}
+    if "summary" in levels:
+        print(
+            "Outcome comparison is available from summary logs; decision review "
+            "requires hero/full logs, and all-style behavior/latency metrics require full."
+        )
+    elif "hero" in levels:
+        print(
+            "Outcome comparison is available from hero logs; opponent behavior and "
+            "latency metrics require full logs."
+        )
 
 
 def aggregate_six(run_dirs: list[Path]) -> None:

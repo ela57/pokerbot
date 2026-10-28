@@ -102,6 +102,7 @@ def run_batch(
     run_dir: Path,
     log_level: str = "full",
     hero_path: str | Path = "bots/my_bot.py",
+    keep_shards: bool = False,
 ) -> tuple[list[dict], float]:
     if workers < 1:
         raise ValueError("workers must be at least 1")
@@ -205,12 +206,15 @@ def run_batch(
     for index, seed in enumerate(seeds):
         results.setdefault(index, {"seed": seed, "failed": True, "worker_error": "missing_result"})
         results[index].setdefault("seed", seed)
-    merge_shards(run_dir, log_level)
+    merge_shards(run_dir, log_level, keep_shards=keep_shards)
     with sqlite3.connect(run_dir / "results.sqlite") as connection:
         for index, row in results.items():
             if row.get("failed"):
                 connection.execute(
-                    "INSERT OR REPLACE INTO sngs VALUES (?, -1, NULL, 0, 0, 0, 0, 1)",
+                    "INSERT OR REPLACE INTO sngs "
+                    "(seed, hero_seat, hero_finish, points, final_stack, busted, "
+                    "hands_played, failed, stats_json) "
+                    "VALUES (?, -1, NULL, 0, 0, 0, 0, 1, NULL)",
                     (row.get("seed", seeds[index]),),
                 )
         connection.commit()
