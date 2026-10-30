@@ -243,10 +243,17 @@ def report(run_dir: Path) -> None:
     try:
         with sqlite3.connect(run_dir / "results.sqlite") as connection:
             lineups = connection.execute(
-                "SELECT opponent_style_lineup, COUNT(DISTINCT seed), AVG(s.points) "
-                "FROM decisions d JOIN sngs s USING(seed) "
-                "WHERE d.bot_label='hero' AND s.failed=0 "
-                "GROUP BY opponent_style_lineup"
+                """
+                SELECT d.opponent_style_lineup, COUNT(*), AVG(s.points)
+                FROM sngs s
+                JOIN (
+                    SELECT DISTINCT seed, opponent_style_lineup
+                    FROM decisions
+                    WHERE bot_label='hero'
+                ) d USING(seed)
+                WHERE s.failed=0
+                GROUP BY d.opponent_style_lineup
+                """
             ).fetchall()
     except sqlite3.OperationalError:
         lineups = []
